@@ -1,0 +1,1577 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Verwaltungscloud Antragsportal",
+    "description": "Das Verwaltungscloud Antragsportal ermöglicht das Stellen von Onlineanträgen für integrierte Fachverfahren. Weitere Informationen: [Antragsportal Backend Dokumentation](https://knowledge.tools.verwaltungscloud.dev/books/backend/page/antragsportal-backend)",
+    "contact": {
+      "email": "info@verwaltungscloud.sh"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.antrag.dev.verwaltungs.cloud/v1"
+    },
+    {
+      "url": "http://localhost:4000/v1"
+    }
+  ],
+  "tags": [
+    {
+      "name": "health",
+      "description": "Healthchecks"
+    },
+    {
+      "name": "receivers",
+      "description": "application receiving entities"
+    },
+    {
+      "name": "transactionschemas",
+      "description": "schemas for transactions"
+    },
+    {
+      "name": "transactions",
+      "description": "transactions"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Healthcheck on the Backend Service",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HealthcheckOK"
+          }
+        }
+      }
+    },
+    "/health/mongodbconnection": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Healthcheck on the MongoDB Connection",
+        "description": "checks if the backend service is connected to the MongoDB",
+        "operationId": "getHealthMongoDB",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HealthcheckOK"
+          }
+        }
+      }
+    },
+    "/health/gotenberg": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Healthcheck on the Gotenberg Service",
+        "description": "check if the Gotenberg service (PDF rendering engine) is up and reachable",
+        "operationId": "getHealthGotenberg",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HealthcheckOK"
+          }
+        }
+      }
+    },
+    "/receivers": {
+      "get": {
+        "tags": [
+          "receivers"
+        ],
+        "summary": "query receivers (odatafy enabled)",
+        "description": "Queries receivers.<br>Route is odatafy compatible. <br>Documentation and examples can be found <a href=http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html#sec_QueryOptions>here</a>.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Receiver"
+                      }
+                    },
+                    "count": {
+                      "$ref": "#/components/schemas/OdatafyCount"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "receivers"
+        ],
+        "security": [
+          {
+            "adminTokenAuth": []
+          }
+        ],
+        "summary": "create a receiver",
+        "description": "create a receiver",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Receiver"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Receiver created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Receiver"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/receivers/{receiverId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/receiverId"
+        }
+      ],
+      "get": {
+        "tags": [
+          "receivers"
+        ],
+        "summary": "get Receiver by Id",
+        "description": "get Receiver by Id",
+        "responses": {
+          "200": {
+            "description": "Receiver",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Receiver"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "receivers"
+        ],
+        "security": [
+          {
+            "adminTokenAuth": []
+          }
+        ],
+        "summary": "update Receiver by Id",
+        "description": "update Receiver by Id",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Receiver"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Receiver updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Receiver"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "receivers"
+        ],
+        "security": [
+          {
+            "adminTokenAuth": []
+          }
+        ],
+        "summary": "delete Receiver by Id",
+        "description": "delete Receiver by Id",
+        "responses": {
+          "204": {
+            "description": "Receiver deleted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/receivers/many": {
+      "post": {
+        "tags": [
+          "receivers"
+        ],
+        "security": [
+          {
+            "adminTokenAuth": []
+          }
+        ],
+        "summary": "create many receivers",
+        "description": "create many receivers",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Receiver"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Receiver created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Receiver"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/transactionschemas": {
+      "get": {
+        "tags": [
+          "transactionschemas"
+        ],
+        "summary": "query transactionschemas (odatafy enabled)",
+        "description": "Queries transactionschemas.<br>Route is odatafy compatible. <br>Documentation and examples can be found <a href=http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html#sec_QueryOptions>here</a>.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "receiver",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "receiveralias",
+              "description": "filters transactionschemas by the presence of the specified receiveralias in the receivers array (currently not supported by odatafy)"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/showStepSchemas"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "oneOf": [
+                          {
+                            "$ref": "#/components/schemas/TransactionSchema"
+                          },
+                          {
+                            "$ref": "#/components/schemas/TransactionSchemaWithStepSchemas"
+                          }
+                        ]
+                      }
+                    },
+                    "count": {
+                      "$ref": "#/components/schemas/OdatafyCount"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/transactionschemas/alias/{transactionSchemaAlias}": {
+      "get": {
+        "tags": [
+          "transactionschemas"
+        ],
+        "summary": "get transactionschema by alias",
+        "description": "get transactionschema by alias. Also returns the metadata for the stepSchemas",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/transactionSchemaAlias"
+          },
+          {
+            "$ref": "#/components/parameters/showStepSchemas"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/TransactionSchemaWithStepMetadata"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TransactionSchemaWithStepSchemas"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/transactionschemas/alias/{transactionSchemaAlias}/step/{stepSchemaAlias}/transaction/{transactionId}": {
+      "get": {
+        "security": [
+          {
+            "hashAuth": []
+          }
+        ],
+        "tags": [
+          "transactionschemas"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/transactionId"
+          },
+          {
+            "$ref": "#/components/parameters/stepSchemaAlias"
+          },
+          {
+            "$ref": "#/components/parameters/transactionSchemaAlias"
+          },
+          {
+            "$ref": "#/components/parameters/skipMode"
+          }
+        ],
+        "summary": "render a stepschema",
+        "description": "renders the schema for a step of a transactionschema to fit the current state of a transaction.<br/> If the step is unnecessary and therefore skipped, the route returns the next necessary step in the direction specified in the query param.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StepSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/transactionschemas/alias/{transactionSchemaAlias}/step/{stepSchemaAlias}/transaction/{transactionId}/previous": {
+      "get": {
+        "security": [
+          {
+            "hashAuth": []
+          }
+        ],
+        "tags": [
+          "transactionschemas"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/transactionId"
+          },
+          {
+            "$ref": "#/components/parameters/stepSchemaAlias"
+          },
+          {
+            "$ref": "#/components/parameters/transactionSchemaAlias"
+          }
+        ],
+        "summary": "render a stepschema",
+        "description": "renders the schema for the previous step of a transactionschema to fit the current state of a transaction.<br/> If the step is unnecessary and therefore skipped, the route returns the first necessary step from the previous steps.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StepSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/transactionschemas/{transactionId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/transactionId"
+        }
+      ],
+      "get": {
+        "tags": [
+          "transactionschemas"
+        ],
+        "summary": "get TransactionSchema by Id",
+        "description": "get TransactionSchema by Id",
+        "responses": {
+          "200": {
+            "description": "TransactionSchema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionSchemaWithStepSchemas"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "transactionschemas"
+        ],
+        "security": [
+          {
+            "adminTokenAuth": []
+          }
+        ],
+        "summary": "update TransactionSchema by Id",
+        "description": "update TransactionSchema by Id",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionSchemaWithStepSchemas"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "TransactionSchema updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionSchemaWithStepSchemas"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "transactionschemas"
+        ],
+        "security": [
+          {
+            "adminTokenAuth": []
+          }
+        ],
+        "summary": "delete TransactionSchema by Id",
+        "description": "delete TransactionSchema by Id",
+        "responses": {
+          "204": {
+            "description": "TransactionSchema deleted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/transactions": {
+      "post": {
+        "tags": [
+          "transactions"
+        ],
+        "summary": "create a transaction",
+        "description": "creates a transaction for the given transactionSchema. Returns the created transactionId and the first rendered StepSchema (Inspect Schema to see the variations of StepSchema like StepSchemaAjv).",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Transaction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactionId": {
+                      "$ref": "#/components/schemas/ObjectId"
+                    },
+                    "uuid": {
+                      "type": "string",
+                      "format": "uuid",
+                      "example": "59e62d21-45a1-4f32-9358-3fee028c6b4d",
+                      "description": "cryptographically safe unique identifier"
+                    },
+                    "firstStepSchema": {
+                      "$ref": "#/components/schemas/StepSchema"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/transactions/{transactionId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/transactionId"
+        }
+      ],
+      "get": {
+        "security": [
+          {
+            "hashAuth": []
+          }
+        ],
+        "tags": [
+          "transactions"
+        ],
+        "summary": "get a transaction by Id",
+        "description": "get a transaction by Id (useful when continuing editing a transaction)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transaction"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/transactions/{transactionId}/exists": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/transactionId"
+        }
+      ],
+      "get": {
+        "tags": [
+          "transactions"
+        ],
+        "summary": "check if transaction exists",
+        "description": "check if a transaction exists. Route is limited to 2 requests per 5 seconds.",
+        "responses": {
+          "200": {
+            "description": "Transaction exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exists": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/transactions/{transactionId}/render": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/transactionId"
+        }
+      ],
+      "get": {
+        "security": [
+          {
+            "hashAuth": []
+          }
+        ],
+        "tags": [
+          "transactions"
+        ],
+        "summary": "render userInputsPdf for transaction",
+        "description": "render userInputsPdf for transaction",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "userInputsPdfBase64": {
+                      "type": "string",
+                      "format": "base64",
+                      "description": "pdf with an overview of the user inputs for this transaction"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/transactions/{transactionId}/step/{stepSchemaAlias}": {
+      "put": {
+        "security": [
+          {
+            "hashAuth": []
+          }
+        ],
+        "summary": "save transaction step",
+        "description": "saves a transaction step and returns the rendered schema for the next step.<br/> If the next step is unnecessary and therefore skipped, the route returns the rendered next necessary step instead.",
+        "tags": [
+          "transactions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/transactionId"
+          },
+          {
+            "$ref": "#/components/parameters/stepSchemaAlias"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "object according to the corresponding stepSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StepSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "406": {
+            "description": "No data shall be saved for this step. This can be due to the step being skipped or the step being submit."
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "get": {
+        "summary": "get transaction step data",
+        "description": "get transaction step data",
+        "tags": [
+          "transactions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/transactionId"
+          },
+          {
+            "$ref": "#/components/parameters/stepSchemaAlias"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "object that might confirm to the stepSchema, but might not if changes in previous steps resulted in a change in the stepSchema of this step, but the data was not adjusted yet"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "description": "StepSchemaAlias was not found in TransactionSchema and therefore is invalid."
+          },
+          "409": {
+            "description": "No Data found for this step, but the StepSchemaAlias is valid. This might mean that the step was previously skipped or that no data was saved yet"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/transactions/{transactionId}/step/{stepSchemaAlias}/property/{propertyName}/filename/{filename}": {
+      "get": {
+        "tags": [
+          "transactions"
+        ],
+        "security": [
+          {
+            "hashAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/transactionId"
+          },
+          {
+            "$ref": "#/components/parameters/stepSchemaAlias"
+          },
+          {
+            "$ref": "#/components/parameters/propertyName"
+          },
+          {
+            "$ref": "#/components/parameters/filename"
+          }
+        ],
+        "summary": "get file",
+        "description": "get file for a property of a file_upload step. Needed because when requesting the data of a file_upload step only the filenames are returned for performance reasons.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "filename": {
+                      "type": "string",
+                      "description": "filename of the retrieved file",
+                      "example": "example.jpg"
+                    },
+                    "base64": {
+                      "type": "string",
+                      "format": "base64",
+                      "description": "file as base64 string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/transactions/{transactionId}/submit": {
+      "put": {
+        "security": [
+          {
+            "hashAuth": []
+          }
+        ],
+        "summary": "submit transaction",
+        "description": "submits the transaction to the target system and deletes it, if successful",
+        "tags": [
+          "transactions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/transactionId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "userInputsPdfBase64": {
+                      "type": "string",
+                      "format": "base64",
+                      "description": "pdf with an overview of the user inputs for this transaction"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "HealthcheckOK": {
+        "description": "Healthcheck successful",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "default": "OK"
+                }
+              }
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "Bad Request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "msg": {
+                  "type": "string",
+                  "example": "malformed filter expression",
+                  "description": "error message"
+                }
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Document not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "msg": {
+                  "type": "string",
+                  "example": "document not found",
+                  "description": "error message"
+                }
+              }
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Request blocked by rate limiting",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "msg": {
+                  "type": "string",
+                  "example": "Rate limit exceeded for TRANSACTION_EXISTS",
+                  "description": "error message"
+                }
+              }
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "msg": {
+                  "type": "string",
+                  "example": "Internal Server Error",
+                  "description": "error message"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "transactionId": {
+        "in": "path",
+        "name": "transactionId",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/ObjectId"
+        }
+      },
+      "receiverId": {
+        "in": "path",
+        "name": "receiverId",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/ObjectId"
+        }
+      },
+      "propertyName": {
+        "in": "path",
+        "name": "propertyName",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "description": "name of the property of the StepSchema for which to retrieve data",
+          "example": "incomeFiles"
+        }
+      },
+      "filename": {
+        "in": "path",
+        "name": "filename",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "description": "name of the file to retrieve",
+          "example": "steuererklärung.jpg"
+        }
+      },
+      "stepSchemaAlias": {
+        "in": "path",
+        "name": "stepSchemaAlias",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "description": "alias of the step from the stepschema"
+        }
+      },
+      "transactionSchemaAlias": {
+        "in": "path",
+        "name": "transactionSchemaAlias",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "description": "alias of the transactionSchema"
+        }
+      },
+      "skipMode": {
+        "in": "query",
+        "name": "skipMode",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "next",
+            "previous"
+          ],
+          "default": "next",
+          "description": "if the requested step is skipped, the backend will return the next / previous step instead"
+        }
+      },
+      "showStepSchemas": {
+        "in": "query",
+        "name": "showStepSchemas",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "schemas": {
+      "ObjectId": {
+        "type": "string",
+        "format": "Mongo ObjectId",
+        "readOnly": true,
+        "example": "507f1f77bcf86cd799439011"
+      },
+      "Timestamp": {
+        "type": "string",
+        "format": "Date",
+        "readOnly": true,
+        "example": "2023-08-18T13:51:39.462Z"
+      },
+      "OdatafyCount": {
+        "type": "number",
+        "description": "number of total query results, regardless of the returned number of documents (useful for pagination)"
+      },
+      "Receiver": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "name": {
+            "type": "string",
+            "example": "Amt Hüttener Berge"
+          },
+          "alias": {
+            "type": "string",
+            "description": "nickname of the receiver to match it with tenants in the target system",
+            "format": "lowercase no spaces",
+            "example": "amthb"
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "URL for the receivers logo to be displayed",
+            "example": "https://minio-api.tools.verwaltungscloud.dev/verwaltungscloud-public-assets/LogoDL%20zoom.png"
+          },
+          "hierarchyLevel": {
+            "type": "string",
+            "enum": [
+              "amt",
+              "kreis"
+            ],
+            "description": "hierarchyLevel of the Receiver."
+          },
+          "rootReceiverAlias": {
+            "type": "string",
+            "description": "alias for the root receiver in the Receiver tree. Required for hierarchyLevel amt."
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "updatedAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "_id",
+          "name",
+          "alias",
+          "hierarchyLevel"
+        ]
+      },
+      "TransactionSchema": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "name": {
+            "type": "string",
+            "example": "Antrag auf Ermäßigung der Kita-Beiträge"
+          },
+          "detailName": {
+            "type": "string",
+            "example": "Antrag auf Ermäßigung oder Übernahme des Kostenbeitrages für die Förderung in einer Kindertagesstätte gem. § 90 SGB VIII "
+          },
+          "alias": {
+            "type": "string",
+            "example": "kiso_rd"
+          },
+          "hierarchyLevel": {
+            "type": "string",
+            "enum": [
+              "amt",
+              "kreis"
+            ],
+            "description": "hierarchyLevel at which this transactionSchema has to be submitted"
+          },
+          "targetSystemSubmitURL": {
+            "type": "string",
+            "description": "URL of the target system where the transaction should be submitted to",
+            "example": "https://api.dev.verwaltungs.cloud/v1/sozialstaffel/ozgapplications"
+          },
+          "submitStrategy": {
+            "type": "string",
+            "description": "reference to the submit strategy to use for submitting this type of transaction",
+            "example": "sozialstaffel_plus"
+          },
+          "receivers": {
+            "type": "array",
+            "description": "Receivers that can receive this transaction",
+            "items": {
+              "type": "string",
+              "format": "receiverAlias"
+            }
+          }
+        }
+      },
+      "StepSchemaMetadata": {
+        "type": "object",
+        "properties": {
+          "stepSchemaMetadata": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "stepSchemaIndex": {
+                  "type": "number"
+                },
+                "stepSchemaName": {
+                  "type": "string",
+                  "example": "Datenschutzbestimmungen"
+                },
+                "stepSchemaAlias": {
+                  "type": "string",
+                  "example": "dataprivacy"
+                }
+              }
+            }
+          }
+        }
+      },
+      "TransactionSchemaWithStepMetadata": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TransactionSchema"
+          },
+          {
+            "$ref": "#/components/schemas/StepSchemaMetadata"
+          }
+        ]
+      },
+      "TransactionSchemaWithStepSchemas": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TransactionSchema"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "stepSchemas": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/StepSchema"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "StepSchema": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/StepSchemaAjv"
+          },
+          {
+            "$ref": "#/components/schemas/StepSchemaAjvMultistep"
+          },
+          {
+            "$ref": "#/components/schemas/StepSchemaFileUpload"
+          },
+          {
+            "$ref": "#/components/schemas/StepSchemaTermsAndConditions"
+          },
+          {
+            "$ref": "#/components/schemas/StepSchemaSubmit"
+          }
+        ]
+      },
+      "StepSchemaBase": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "stepSchemaName": {
+            "type": "string",
+            "example": "Antrag absenden"
+          },
+          "stepSchemaAlias": {
+            "type": "string",
+            "format": "lowercase no spaces",
+            "example": "submit"
+          },
+          "stepSchemaIndex": {
+            "type": "number",
+            "readOnly": true,
+            "example": 0
+          },
+          "renderingStrategy": {
+            "type": "string",
+            "description": "reference to the rendering strategy that should be used for this StepSchema",
+            "example": "basic"
+          },
+          "skipStrategy": {
+            "type": "string",
+            "description": "reference to the skip strategy that shoudl be used for determining whether this StepSchema should be skipped",
+            "example": "noskip"
+          }
+        },
+        "required": [
+          "_id",
+          "stepSchemaName",
+          "stepSchemaAlias",
+          "stepSchemaIndex",
+          "renderingStrategy",
+          "skipStrategy"
+        ]
+      },
+      "StepSchemaSubmit": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/StepSchemaBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "submit"
+              },
+              "targetSystemSubmitURL": {
+                "type": "string",
+                "description": "URL of the target system to send the final submission to (handled by backend)",
+                "example": "https://api.rd-eck.verwaltungscloud.sh/v1/ozg/submit"
+              },
+              "display": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string",
+                    "description": "Text to display on the submit page",
+                    "example": "Wenn Sie auf diesen Knopf drücken, wird Ihr Antrag abgesendet. Das zuständige Amt wird in Kürze auf Sie zukommen."
+                  }
+                },
+                "required": [
+                  "description"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "targetSystemSubmitURL",
+              "display"
+            ]
+          }
+        ]
+      },
+      "StepSchemaAjv": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/StepSchemaBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "ajv"
+              },
+              "ajv": {
+                "type": "object",
+                "description": "[ajv schema](https://ajv.js.org/json-schema.html) with [@vcsh/ajv-form-keywords](https://www.npmjs.com/package/@vcsh/ajv-form-keywords) plugin for display options.<br/> [Example](https://github.com/verwaltungscloud/vc-antragsportal-backend/blob/prod/templates/transactionSchemas/validation_example.json)<br/>For more detailed information on StepSchemas, please refer to the [Bookstack Documentation](https://knowledge.tools.verwaltungscloud.dev/books/backend/page/antragsportal-backend)"
+              }
+            }
+          }
+        ]
+      },
+      "StepSchemaAjvMultistep": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/StepSchemaBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "ajv"
+              },
+              "minorStepIndex": {
+                "type": "number",
+                "readOnly": true,
+                "description": "if the ajv multistep schema was requested in a specific iteration, this is reflected here",
+                "example": 0
+              },
+              "ajv": {
+                "type": "object",
+                "description": "[ajv schema](https://ajv.js.org/json-schema.html) with [@vcsh/ajv-form-keywords](https://www.npmjs.com/package/@vcsh/ajv-form-keywords) plugin for display options.<br/> [Example](https://github.com/verwaltungscloud/vc-antragsportal-backend/blob/prod/templates/transactionSchemas/validation_example.json)<br/>For more detailed information on StepSchemas, please refer to the [Bookstack Documentation](https://knowledge.tools.verwaltungscloud.dev/books/backend/page/antragsportal-backend)"
+              }
+            },
+            "required": [
+              "type",
+              "ajv"
+            ]
+          }
+        ]
+      },
+      "StepSchemaFileUpload": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/StepSchemaBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "file_upload"
+              },
+              "ajv": {
+                "type": "object",
+                "description": "[ajv schema](https://ajv.js.org/json-schema.html) with [@vcsh/ajv-form-keywords](https://www.npmjs.com/package/@vcsh/ajv-form-keywords) plugin for display options.<br/> [Example](https://github.com/verwaltungscloud/vc-antragsportal-backend/blob/prod/templates/transactionSchemas/validation_example.json)<br/>For more detailed information on StepSchemas, please refer to the [Bookstack Documentation](https://knowledge.tools.verwaltungscloud.dev/books/backend/page/antragsportal-backend)"
+              }
+            },
+            "required": [
+              "type",
+              "ajv"
+            ]
+          }
+        ]
+      },
+      "StepSchemaTermsAndConditions": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/StepSchemaBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "terms_and_conditions"
+              },
+              "ajv": {
+                "type": "object",
+                "description": "[ajv schema](https://ajv.js.org/json-schema.html) with [@vcsh/ajv-form-keywords](https://www.npmjs.com/package/@vcsh/ajv-form-keywords) plugin for display options.<br/> [Example](https://github.com/verwaltungscloud/vc-antragsportal-backend/blob/prod/templates/transactionSchemas/validation_example.json)<br/>For more detailed information on StepSchemas, please refer to the [Bookstack Documentation](https://knowledge.tools.verwaltungscloud.dev/books/backend/page/antragsportal-backend)"
+              }
+            },
+            "required": [
+              "type",
+              "ajv"
+            ]
+          }
+        ]
+      },
+      "Transaction": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "uuid": {
+            "type": "string",
+            "format": "uuid",
+            "example": "59e62d21-45a1-4f32-9358-3fee028c6b4d",
+            "description": "cryptographically safe unique identifier for the transaction. also used in the applicantHash Authentication Scheme."
+          },
+          "transactionSchemaAlias": {
+            "type": "string",
+            "example": "example",
+            "description": "reference to the schema of the transaction"
+          },
+          "receiverAlias": {
+            "type": "string",
+            "description": "Alias of the Receiver that this transaction should be submitted to"
+          },
+          "lastModifiedStepSchemaAlias": {
+            "type": "string",
+            "example": "dataprivacy"
+          },
+          "data": {
+            "type": "object",
+            "readOnly": true,
+            "additionalProperties": true,
+            "description": "Data of the transaction steps. Map of StepSchema Alias and Data according to the AJV Schemas of the respective steps. Only use PUT /transactions/{transactionId}/step/{stepSchemaAlias} route to modify.",
+            "example": "{ caseData: {reference: 'Az 2662/2789' } }"
+          },
+          "applicant": {
+            "type": "object",
+            "properties": {
+              "firstName": {
+                "type": "string",
+                "example": "Peter"
+              },
+              "lastName": {
+                "type": "string",
+                "example": "Lustig"
+              },
+              "dateOfBirth": {
+                "type": "string",
+                "format": "Date",
+                "example": "2000-01-02"
+              },
+              "email": {
+                "type": "string",
+                "example": "peter@lustig.de"
+              },
+              "phone": {
+                "type": "string",
+                "example": "015112240496"
+              }
+            },
+            "required": [
+              "firstName",
+              "lastName",
+              "dateOfBirth",
+              "email",
+              "phone"
+            ]
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "updatedAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "_id",
+          "uuid",
+          "transactionSchemaAlias",
+          "receiverAlias",
+          "lastModifiedStepSchemaAlias",
+          "applicant"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "hashAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bcrypt Hash of transaction.uuid and firstName, lastName, dateOfBirth.toIsoString() of the applicant that created the transaction concatenated in that order without spaces. Example: Hash(\"59e62d21-45a1-4f32-9358-3fee028c6b4dPeterLustig2000-01-02T00:00:00.000Z\")"
+      },
+      "adminTokenAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "admin-token",
+        "description": "Admin Token for admin operations"
+      }
+    }
+  }
+}
